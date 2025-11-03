@@ -6,6 +6,19 @@ const read = async (req, res) => {
     res.json(vendas);
 }
 
+const post = async (req, res) => {
+    const { cliente, alocacao, data } = req.body;
+    const novaVenda = await prisma.venda.create({
+        data: {
+            data,
+            alocacao,
+            cliente
+        }
+    });
+    res.status(201).json(novaVenda);
+}
+
 module.exports = {
-    read
+    read,
+    post
 };

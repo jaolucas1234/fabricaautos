@@ -1,13 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabrica de Automoveis</title>
+    <title>Fábrica de Automóveis</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header><h1></h1></header>
     <main></main>
+    
+    <!-- Modal 1 - Área -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal1-titulo">Área ...</h2>
+            <div id="modal1-conteudo">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2 - Confirmação de Venda -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal2-titulo">...</h2>
+            <div class="cliente-info">
+                <h6>Cliente</h6>
+                <p id="modal2-cliente">Concessionária</p>
+            </div>
+            <div class="concessionaria-info">
+                <h6>Concessionária</h6>
+                <p id="modal2-concessionaria">Concessionária</p>
+            </div>
+            <button id="confirmar-venda">Confirmar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
-<script src="script.js"></script>
 </html>

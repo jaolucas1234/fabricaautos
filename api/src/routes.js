@@ -14,6 +14,7 @@ router.get('/clientes', Cliente.read);
 router.get('/concessionarias', Concessionaria.read);
 
 router.get('/vendas', Venda.read);
+router.post('/vendas', Venda.post);
 
 router.get('/alocacoes', Alocacao.read);
 
