@@ -124,7 +124,7 @@ main{
 }
 
 .status-vendido {
-    color: #28a745;
+    color: #7814FF;
     font-weight: bold;
     margin-left: 10px;
 }
@@ -178,7 +178,7 @@ main{
 }
 
 #confirmar-venda {
-    background-color: #28a745;
+    background-color: #7814FF;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -189,5 +189,5 @@ main{
 }
 
 #confirmar-venda:hover {
-    background-color: #218838;
+    background-color: #7814FF;
 }

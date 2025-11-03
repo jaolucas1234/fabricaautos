@@ -62,17 +62,10 @@ async function montarAreas() {
         const area = document.createElement('div');
         area.className = 'area';
         area.id = `area-${i}`;
+        area.innerHTML = `<p>${i}</p>`;
         
-        // Verificar se a área está alocada e se foi vendida
+        // Verificar se a área está alocada
         const areaAlocada = alocacoes.find(a => a.area === i);
-        let areaVendida = false;
-        if (areaAlocada) {
-            const vendaExistente = vendas.find(v => v.alocacao === areaAlocada.id);
-            areaVendida = !!vendaExistente;
-        }
-        
-        // Texto da área: número + "Vendido" se for o caso
-        area.innerHTML = `<p>${i}${areaVendida ? '<br><span class="vendido-texto">Vendido</span>' : ''}</p>`;
         
         if (areaAlocada) {
             // Área AZUL (alocada) - Pode vender ou mostrar info se já vendida
@@ -129,67 +122,67 @@ function configurarEventosModais() {
 function abrirModalArea(areaId) {
     areaSelecionada = areaId;
     
-    // Buscar a alocação desta área
-    alocacaoSelecionada = alocacoes.find(a => a.area === areaId);
+    // Buscar TODAS as alocações desta área
+    const alocacoesArea = alocacoes.filter(a => a.area === areaId);
     
-    if (alocacaoSelecionada) {
-        // Verificar se já foi vendida
-        const vendaExistente = vendas.find(v => v.alocacao === alocacaoSelecionada.id);
+    if (alocacoesArea.length > 0) {
+        modal1Titulo.textContent = `Área ${areaId}`;
+        modal1Conteudo.innerHTML = '';
         
-        if (vendaExistente) {
-            // JÁ VENDIDA - Mostrar informações
-            modal1Titulo.textContent = `Área ${areaId}`;
+        // Para cada alocação na área, mostrar o carro
+        alocacoesArea.forEach(alocacao => {
+            const automovel = automoveis.find(a => a.id === alocacao.automovel);
+            const concessionaria = concessionarias.find(c => c.id === alocacao.concessionaria);
+            const vendaExistente = vendas.find(v => v.alocacao === alocacao.id);
             
-            const automovelArea = automoveis.find(a => a.id === alocacaoSelecionada.automovel);
-            const concessionariaArea = concessionarias.find(c => c.id === alocacaoSelecionada.concessionaria);
-            const clienteVenda = clientes.find(c => c.id === vendaExistente.cliente);
-            
-            modal1Conteudo.innerHTML = `
-                <div class="info-venda">
-                    <h3>Carro Vendido</h3>
-                    <div class="carro-item vendido">
-                        <p><strong>Modelo:</strong> ${automovelArea ? automovelArea.modelo : 'N/A'} | <strong>Preço:</strong> R$ ${automovelArea ? automovelArea.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : 'N/A'} <span class="status-vendido">Vendido</span></p>
-                    </div>
-                    <div class="detalhes-venda">
-                        <p><strong>Concessionária:</strong> ${concessionariaArea ? concessionariaArea.concessionaria : 'N/A'}</p>
-                        <p><strong>Cliente:</strong> ${clienteVenda ? clienteVenda.nome : 'N/A'}</p>
-                        <p><strong>Data:</strong> ${new Date(vendaExistente.data).toLocaleDateString('pt-BR')}</p>
-                    </div>
-                </div>
-            `;
-        } else {
-            // NÃO VENDIDA - Mostrar lista de carros para vender
-            modal1Titulo.textContent = `Área ${areaId}`;
-            
-            modal1Conteudo.innerHTML = '';
-            
-            automoveis.forEach(automovel => {
+            if (automovel) {
                 const item = document.createElement('div');
                 item.className = 'carro-item';
-                item.innerHTML = `
-                    <div class="carro-info">
-                        <p><strong>Modelo:</strong> ${automovel.modelo} | <strong>Preço:</strong> R$ ${automovel.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    </div>
-                    <button class="vender-btn" data-automovel-id="${automovel.id}">Vender</button>
-                `;
+                
+                if (vendaExistente) {
+                    // CARRO VENDIDO - Mostrar informações da venda
+                    const clienteVenda = clientes.find(c => c.id === vendaExistente.cliente);
+                    item.innerHTML = `
+                        <div class="carro-info">
+                            <p><strong>Modelo:</strong> ${automovel.modelo} | <strong>Preço:</strong> R$ ${automovel.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} <span class="status-vendido">Vendido</span></p>
+                        </div>
+                        <div class="detalhes-venda">
+                            <p><strong>Concessionária:</strong> ${concessionaria ? concessionaria.concessionaria : 'N/A'}</p>
+                            <p><strong>Cliente:</strong> ${clienteVenda ? clienteVenda.nome : 'N/A'}</p>
+                            <p><strong>Data:</strong> ${new Date(vendaExistente.data).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    `;
+                } else {
+                    // CARRO DISPONÍVEL - Mostrar opção para vender
+                    item.innerHTML = `
+                        <div class="carro-info">
+                            <p><strong>Modelo:</strong> ${automovel.modelo} | <strong>Preço:</strong> R$ ${automovel.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                        <button class="vender-btn" data-automovel-id="${automovel.id}" data-alocacao-id="${alocacao.id}">Vender</button>
+                    `;
+                }
+                
                 modal1Conteudo.appendChild(item);
-            });
+            }
+        });
 
-            document.querySelectorAll('.vender-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const automovelId = e.target.getAttribute('data-automovel-id');
-                    automovelSelecionado = automoveis.find(a => a.id == automovelId);
-                    abrirModalConfirmacao();
-                });
+        // Adicionar eventos aos botões de vender (apenas para carros não vendidos)
+        document.querySelectorAll('.vender-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const automovelId = e.target.getAttribute('data-automovel-id');
+                const alocacaoId = e.target.getAttribute('data-alocacao-id');
+                automovelSelecionado = automoveis.find(a => a.id == automovelId);
+                alocacaoSelecionada = alocacoes.find(a => a.id == alocacaoId);
+                abrirModalConfirmacao();
             });
-        }
+        });
     }
 
     modal1.style.display = 'block';
 }
 
 function abrirModalConfirmacao() {
-    if (automovelSelecionado) {
+    if (automovelSelecionado && alocacaoSelecionada) {
         modal2Titulo.textContent = automovelSelecionado.modelo;
         
         clienteSelecionado = null;
@@ -241,55 +234,29 @@ function fecharModais() {
 }
 
 async function confirmarVenda() {
-    if (areaSelecionada && automovelSelecionado && clienteSelecionado && concessionariaSelecionada) {
+    if (alocacaoSelecionada && clienteSelecionado) {
         try {
-            // Primeiro criar a alocação
-            const alocacaoData = {
-                area: areaSelecionada,
-                quantidade: 1,
-                automovel: automovelSelecionado.id,
-                concessionaria: concessionariaSelecionada.id
+            // Criar apenas a venda
+            const vendaData = {
+                cliente: clienteSelecionado.id,
+                alocacao: alocacaoSelecionada.id
             };
 
-            const alocacaoResponse = await fetch(uri + 'alocacoes', {
+            const vendaResponse = await fetch(uri + 'vendas', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(alocacaoData)
+                body: JSON.stringify(vendaData)
             });
 
-            if (alocacaoResponse.ok) {
-                const novaAlocacao = await alocacaoResponse.json();
-
-                // Agora criar a venda
-                const vendaData = {
-                    cliente: clienteSelecionado.id,
-                    alocacao: novaAlocacao.id
-                };
-
-                const vendaResponse = await fetch(uri + 'vendas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(vendaData)
-                });
-
-                if (vendaResponse.ok) {
-                    alert('Venda confirmada com sucesso!');
-                    // Recarregar as alocações para atualizar a interface
-                    await carregarAlocacoes();
-                    await carregarVendas();
-                    await pintarAreas();
-                    // Recriar as áreas para atualizar o texto "Vendido"
-                    document.querySelector('main').innerHTML = '';
-                    await montarAreas();
-                } else {
-                    alert('Erro ao criar venda');
-                }
+            if (vendaResponse.ok) {
+                alert('Venda confirmada com sucesso!');
+                // Recarregar as vendas para atualizar a interface
+                await carregarVendas();
+                await pintarAreas();
             } else {
-                alert('Erro ao criar alocação');
+                alert('Erro ao criar venda');
             }
             
         } catch (error) {
@@ -299,7 +266,7 @@ async function confirmarVenda() {
         
         fecharModais();
     } else {
-        alert('Por favor, selecione cliente e concessionária');
+        alert('Por favor, selecione cliente');
     }
 }
 
